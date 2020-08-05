@@ -1,0 +1,15 @@
+apiVersion: v1
+name: sdsc-github-action-runner
+version: 0.0.1
+appVersion: 0.0.1
+description: GitHub Actions Runner for Kubernetes
+home: https://github.com/SwissDataScienceCenter/self-hosted-runner-chart
+type: application
+keywords:
+  - github
+  - actions
+  - self-hosted
+  - runner
+maintainers:
+  - name: Swiss Data Science Center
+    email: contact@datascience.ch

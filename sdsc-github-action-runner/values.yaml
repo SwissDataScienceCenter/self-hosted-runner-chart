@@ -1,0 +1,10 @@
+replicas: 1
+
+personalAccessToken: ""
+
+
+# specify either a repository or an organisation that this runner will poll for jobs
+repository:  # e.g. "SwissDataScienceCenter/renku"
+organisation:  # e.g. "SwissDataScienceCenter
+
+image: github/k8s-actions-runner:latest

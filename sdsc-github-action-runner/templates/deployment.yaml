@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: {{ .Values.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+    spec:
+      containers:
+      - name: self-hosted-runner
+        image: {{ .Values.image }}
+        imagePullPolicy: Always
+        command:
+          [
+            '/bin/bash',
+            'custom-startup.sh'
+          ]
+        workingDir: /home/actions-runner
+        env:
+          - name: GITHUB_REPO
+            value: {{ template "repoOrOrg" . }}
+          - name: TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Release.Name }}
+                key: ACTIONS_RUNNER_TOKEN
+          - name: DOCKER_HOST
+            value: 127.0.0.1
+          - name: DOCKER_BUILDKIT
+            value: "1"
+        volumeMounts:
+          - name: startup
+            mountPath: /home/actions-runner/custom-startup.sh
+            subPath: custom-startup.sh
+            readOnly: true
+        lifecycle:
+          preStop:
+            exec:
+              command:
+                [
+                  '/bin/bash',
+                  '-c',
+                  {{- printf "RUNNER_ALLOW_RUNASROOT=1 ./config.sh remove --token $(curl -sS --data \"\" -H \"Authorization: Bearer $TOKEN\" %sactions/runners/remove-token | jq -r .token)" (include "apiBase" .) | quote -}}
+                ]
+        resources:
+            limits:
+              memory: "512Mi"
+              cpu: "250m"
+      # Docker-in-Docker not recommended for production
+      - name: dind
+        image: docker:18.09-dind
+        resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "250m"
+        securityContext:
+          privileged: true
+        volumeMounts:
+          - name: dind-storage
+            mountPath: /var/lib/docker
+      volumes:
+        - name: dind-storage
+          emptyDir: {}
+        - name: startup
+          configMap:
+            name: {{ .Release.Name }}
