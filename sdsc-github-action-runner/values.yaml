@@ -8,3 +8,8 @@ repository:  # e.g. "SwissDataScienceCenter/renku"
 organisation:  # e.g. "SwissDataScienceCenter
 
 image: github/k8s-actions-runner:latest
+
+resources:
+    limits:
+        memory: "512Mi"
+        cpu: "250m"

@@ -49,10 +49,7 @@ spec:
                   '-c',
                   {{- printf "RUNNER_ALLOW_RUNASROOT=1 ./config.sh remove --token $(curl -sS --data \"\" -H \"Authorization: Bearer $TOKEN\" %sactions/runners/remove-token | jq -r .token)" (include "apiBase" .) | quote -}}
                 ]
-        resources:
-            limits:
-              memory: "512Mi"
-              cpu: "250m"
+{{ toYaml .Values.resources | indent 8 }}
       # Docker-in-Docker not recommended for production
       - name: dind
         image: docker:18.09-dind
